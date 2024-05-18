@@ -19,10 +19,10 @@ Shader "Hidden/Universal Render Pipeline/Blit"
             #pragma vertex Vertex
             #pragma fragment Fragment
 
-            #pragma multi_compile _ _LINEAR_TO_SRGB_CONVERSION
+            #pragma multi_compile _ _LINEAR_TO_SRGB_CONVERSION _SRGB_TO_LINEAR_CONVERSION //Add by Yumiao, 加入MultiCompile, 否则不生效
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #ifdef _LINEAR_TO_SRGB_CONVERSION
+            #if defined(_LINEAR_TO_SRGB_CONVERSION) || defined(_SRGB_TO_LINEAR_CONVERSION)
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
             #endif
 
@@ -58,6 +58,14 @@ Shader "Hidden/Universal Render Pipeline/Blit"
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
                 half4 col = SAMPLE_TEXTURE2D_X(_BlitTex, sampler_BlitTex, input.uv);
+                
+                //Add by Yumiao Todo 这里测试的时候复用Blit, 没有单独写一个BlitShader
+                //后续看是否需要单独为sRGB修正做一个Blit着色器
+                #ifdef _SRGB_TO_LINEAR_CONVERSION
+                col = SRGBToLinear(col);
+                #endif
+                //End Add
+                
                 #ifdef _LINEAR_TO_SRGB_CONVERSION
                 col = LinearToSRGB(col);
                 #endif
