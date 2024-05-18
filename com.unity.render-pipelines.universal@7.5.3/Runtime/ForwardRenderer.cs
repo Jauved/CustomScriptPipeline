@@ -345,7 +345,7 @@ namespace UnityEngine.Rendering.Universal
             }
             EnqueuePass(m_OnRenderObjectCallbackPass);
 
-            bool lastCameraInTheStack = cameraData.resolveFinalTarget;
+            bool lastCameraInTheStack = cameraData.resolveFinalTarget;//Add Commit by: Yumiao 实际这里就是lastCamera, 是否最后一个相机
             bool hasCaptureActions = renderingData.cameraData.captureActions != null && lastCameraInTheStack;
             bool applyFinalPostProcessing = anyPostProcessing && lastCameraInTheStack &&
                                      renderingData.cameraData.antialiasing == AntialiasingMode.FastApproximateAntialiasing;
@@ -439,7 +439,8 @@ namespace UnityEngine.Rendering.Universal
                     // no final PP but we have PP stack. In that case it blit unless there are render pass after PP
                     (applyPostProcessing && !hasPassesAfterPostProcessing) ||
                     // offscreen camera rendering to a texture, we don't need a blit pass to resolve to screen
-                    m_ActiveCameraColorAttachment == RenderTargetHandle.CameraTarget;
+                    m_ActiveCameraColorAttachment == RenderTargetHandle.CameraTarget;//Add Commit by: Yumiao, 如果当前激活的RTH=当前相机的RTH, 那么就要走FinalBlit
+                    //Add Commit by: Yumiao, 如果当前是ForceRenderToTex, 那么就不使用.
 
                 // We need final blit to resolve to screen
                 if (!cameraTargetResolved)
