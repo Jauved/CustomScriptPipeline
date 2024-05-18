@@ -589,6 +589,7 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
                 //Add by: Yumiao
                 cameraData.forceNotSRGB = false;
+                cameraData.forceRenderToTexture = false;
                 //End Add
             }
             else if (baseAdditionalCameraData != null)
@@ -599,10 +600,11 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = baseAdditionalCameraData.dithering;
                 cameraData.antialiasing = baseAdditionalCameraData.antialiasing;
                 cameraData.antialiasingQuality = baseAdditionalCameraData.antialiasingQuality;
-                //Add by: Yumiao 传递ForceNotSRGB参数
+                //Add by: Yumiao 传递ForceNotSRGB和ForceRenderToTexture参数, 因为RenderFeature能接受的比较方便的就是CameraData中的数据
                 //Todo 这里写在ForwardRenderer中是个隐患, 如果可能的话, 整个移动到scriptableRenderer中
                 var cur_renderer = baseAdditionalCameraData.scriptableRenderer as ForwardRenderer;
                 cameraData.forceNotSRGB = cur_renderer.ForceNotSRGB;
+                cameraData.forceRenderToTexture = cur_renderer.ForceRenderToTexture;
                 //End Add
             }
             else
@@ -615,6 +617,7 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
                 //Add by: Yumiao
                 cameraData.forceNotSRGB = false;
+                cameraData.forceRenderToTexture = false;
                 //End Add
             }
 
@@ -650,7 +653,7 @@ namespace UnityEngine.Rendering.Universal
             cameraData.captureActions = CameraCaptureBridge.GetCaptureActions(baseCamera);
 
             bool needsAlphaChannel = Graphics.preserveFramebufferAlpha;
-            //Add by Yumiao
+            //Modify by: Yumiao 新写了CreateRenderTextureDescriptor方法的变体并调用
             cameraData.cameraTargetDescriptor = CreateRenderTextureDescriptor(baseCamera, cameraData.renderScale,
                 cameraData.isStereoEnabled, cameraData.isHdrEnabled, msaaSamples, needsAlphaChannel, cameraData.forceNotSRGB);
             //End Add

@@ -34,6 +34,12 @@ namespace UnityEngine.Rendering.Universal
             get => m_ForceNotSRGB;
         }
         bool m_ForceNotSRGB;
+
+        public bool ForceRenderToTexture
+        {
+            get => m_ForceRenderToTexture;
+        }
+        bool m_ForceRenderToTexture;
         //End Add
 
 #if POST_PROCESSING_STACK_2_0_0_OR_NEWER
@@ -78,6 +84,7 @@ namespace UnityEngine.Rendering.Universal
             m_DefaultStencilState.SetZFailOperation(stencilData.zFailOperation);
 
             m_ForceNotSRGB = data.forceNotSRGB;//Add by: Yumiao
+            m_ForceRenderToTexture = data.forceRenderToTexture;//Add by: Yumiao
 
             // Note: Since all custom render passes inject first and we have stable sort,
             // we inject the builtin passes in the before events.
@@ -345,7 +352,7 @@ namespace UnityEngine.Rendering.Universal
             }
             EnqueuePass(m_OnRenderObjectCallbackPass);
 
-            bool lastCameraInTheStack = cameraData.resolveFinalTarget;
+            bool lastCameraInTheStack = cameraData.resolveFinalTarget;//Add Commit by: Yumiao 实际这里就是lastCamera, 是否最后一个相机
             bool hasCaptureActions = renderingData.cameraData.captureActions != null && lastCameraInTheStack;
             bool applyFinalPostProcessing = anyPostProcessing && lastCameraInTheStack &&
                                      renderingData.cameraData.antialiasing == AntialiasingMode.FastApproximateAntialiasing;
@@ -439,7 +446,8 @@ namespace UnityEngine.Rendering.Universal
                     // no final PP but we have PP stack. In that case it blit unless there are render pass after PP
                     (applyPostProcessing && !hasPassesAfterPostProcessing) ||
                     // offscreen camera rendering to a texture, we don't need a blit pass to resolve to screen
-                    m_ActiveCameraColorAttachment == RenderTargetHandle.CameraTarget;
+                    m_ActiveCameraColorAttachment == RenderTargetHandle.CameraTarget //;//Add Commit by: Yumiao, 如果当前激活的RTH=当前相机的RTH, 那么就要走FinalBlit
+                    || m_ForceRenderToTexture;//Add Commit by: Yumiao, 如果当前是ForceRenderToTex, 那么就不使用.
 
                 // We need final blit to resolve to screen
                 if (!cameraTargetResolved)
