@@ -59,7 +59,8 @@ namespace UnityEngine.Rendering.Universal
         [SerializeField] LayerMask m_TransparentLayerMask = -1;
         [SerializeField] StencilStateData m_DefaultStencilState = new StencilStateData();
         [SerializeField] bool m_ShadowTransparentReceive = true;
-        [SerializeField] bool m_ForceNotSRGB = false; //Add by Yumiao
+        [SerializeField] bool m_ForceNotSRGB = false; //Add by: Yumiao
+        [SerializeField] bool m_ForceRenderToTexture = false; //Add by: Yumiao
 
         protected override ScriptableRenderer Create()
         {
@@ -130,6 +131,16 @@ namespace UnityEngine.Rendering.Universal
             {
                 SetDirty();
                 m_ForceNotSRGB = value;
+            }
+        }
+
+        public bool forceRenderToTexture //Add Commit by: Yumiao 这个本来不需要传入相机Data, 但是如果要配合Renderfeature使用, 则传入更方便
+        {
+            get => m_ForceRenderToTexture;
+            set
+            {
+                SetDirty();
+                m_ForceRenderToTexture = value;
             }
         }
         //End Add

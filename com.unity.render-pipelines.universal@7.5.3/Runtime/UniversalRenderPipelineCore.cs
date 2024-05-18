@@ -167,6 +167,7 @@ namespace UnityEngine.Rendering.Universal
         
         //Add by Yumiao
         public bool forceNotSRGB;
+        public bool forceRenderToTexture;
         //End Add
     }
 
