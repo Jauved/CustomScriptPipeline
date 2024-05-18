@@ -27,6 +27,14 @@ namespace UnityEngine.Rendering.Universal
         PostProcessPass m_FinalPostProcessPass;
         FinalBlitPass m_FinalBlitPass;
         CapturePass m_CapturePass;
+        
+        //Add by: Yumiao
+        public bool ForceNotSRGB
+        {
+            get => m_ForceNotSRGB;
+        }
+        bool m_ForceNotSRGB;
+        //End Add
 
 #if POST_PROCESSING_STACK_2_0_0_OR_NEWER
         PostProcessPassCompat m_OpaquePostProcessPassCompat;
@@ -68,6 +76,8 @@ namespace UnityEngine.Rendering.Universal
             m_DefaultStencilState.SetPassOperation(stencilData.passOperation);
             m_DefaultStencilState.SetFailOperation(stencilData.failOperation);
             m_DefaultStencilState.SetZFailOperation(stencilData.zFailOperation);
+
+            m_ForceNotSRGB = data.forceNotSRGB;//Add by: Yumiao
 
             // Note: Since all custom render passes inject first and we have stable sort,
             // we inject the builtin passes in the before events.
@@ -506,6 +516,7 @@ namespace UnityEngine.Rendering.Universal
             }
         }
 
+        //书签: 声明Camera的RT
         void CreateCameraRenderTarget(ScriptableRenderContext context, ref CameraData cameraData)
         {
             CommandBuffer cmd = CommandBufferPool.Get(k_CreateCameraTextures);

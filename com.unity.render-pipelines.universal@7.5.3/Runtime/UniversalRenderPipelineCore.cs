@@ -164,6 +164,10 @@ namespace UnityEngine.Rendering.Universal
         /// When rendering a stack of cameras only the last camera in the stack will resolve to camera target.
         /// </summary>
         public bool resolveFinalTarget;
+        
+        //Add by Yumiao
+        public bool forceNotSRGB;
+        //End Add
     }
 
     [MovedFrom("UnityEngine.Rendering.LWRP")] public struct ShadowData
@@ -228,6 +232,7 @@ namespace UnityEngine.Rendering.Universal
         public static readonly string DepthMsaa8 = "_DEPTH_MSAA_8";
 
         public static readonly string LinearToSRGBConversion = "_LINEAR_TO_SRGB_CONVERSION";
+        public static readonly string SRGBToLinearConversion = "_SRGB_TO_LINEAR_CONVERSION";//Add by Yumiao
         [Obsolete("The _KILL_ALPHA shader keyword is deprecated in the Universal Render Pipeline.")]
         public static readonly string KillAlpha = "_KILL_ALPHA";
 
@@ -405,6 +410,66 @@ namespace UnityEngine.Rendering.Universal
             desc.useDynamicScale = camera.allowDynamicResolution;
             return desc;
         }
+        
+        //Add by: Yumiao
+        //Purpose: 添加强制使用非HDR以及强制使用非sRGB渲染, 用于Linear空间下的UI渲染
+        /// <summary>
+        /// 自定义CreateRenderTextureDescriptor()函数, 添加了forceNotHDR和forceNotSRGB, 用于线性空间下的UI渲染
+        /// </summary>
+        /// <param name="camera"></param>
+        /// <param name="renderScale"></param>
+        /// <param name="isStereoEnabled"></param>
+        /// <param name="isHdrEnabled"></param>
+        /// <param name="msaaSamples"></param>
+        /// <param name="needsAlpha"></param>
+        /// <param name="forceNotHDR"></param>
+        /// <param name="forceNotSRGB"></param>
+        /// <returns></returns>
+        static RenderTextureDescriptor CreateRenderTextureDescriptor(Camera camera, float renderScale,
+            bool isStereoEnabled, bool isHdrEnabled, int msaaSamples, bool needsAlpha, bool forceNotSRGB, bool forceNotHDR = false)
+        {
+            RenderTextureDescriptor desc;
+            GraphicsFormat renderTextureFormatDefault = SystemInfo.GetGraphicsFormat(DefaultFormat.LDR);
+
+            // NB: There's a weird case about XR and render texture
+            // In test framework currently we render stereo tests to target texture
+            // The descriptor in that case needs to be initialized from XR eyeTexture not render texture
+            // Otherwise current tests will fail. Check: Do we need to update the test images instead?
+            if (isStereoEnabled)
+            {
+                desc = XRGraphics.eyeTextureDesc;
+                renderTextureFormatDefault = desc.graphicsFormat;
+            }
+            else if (camera.targetTexture == null)
+            {
+                desc = new RenderTextureDescriptor(camera.pixelWidth, camera.pixelHeight);
+                desc.width = (int)((float)desc.width * renderScale);
+                desc.height = (int)((float)desc.height * renderScale);
+
+                GraphicsFormat hdrFormat;
+                if (!needsAlpha && RenderingUtils.SupportsGraphicsFormat(GraphicsFormat.B10G11R11_UFloatPack32, FormatUsage.Linear | FormatUsage.Render))
+                    hdrFormat = GraphicsFormat.B10G11R11_UFloatPack32;
+                else if (RenderingUtils.SupportsGraphicsFormat(GraphicsFormat.R16G16B16A16_SFloat, FormatUsage.Linear | FormatUsage.Render))
+                    hdrFormat = GraphicsFormat.R16G16B16A16_SFloat;
+                else
+                    hdrFormat = SystemInfo.GetGraphicsFormat(DefaultFormat.HDR); // This might actually be a LDR format on old devices.
+
+                desc.graphicsFormat = isHdrEnabled && !forceNotHDR ? hdrFormat : renderTextureFormatDefault;//Add by: Yumiao
+                desc.depthBufferBits = 32;
+                desc.msaaSamples = msaaSamples;
+                desc.sRGB = (QualitySettings.activeColorSpace == ColorSpace.Linear) && !forceNotSRGB;//Add by: Yumiao
+            }
+            else
+            {
+                desc = camera.targetTexture.descriptor;
+            }
+
+            desc.enableRandomWrite = false;
+            desc.bindMS = false;
+            desc.useDynamicScale = camera.allowDynamicResolution;
+            return desc;
+        }
+        //End Add
 
         static Lightmapping.RequestLightsDelegate lightsDelegate = (Light[] requests, NativeArray<LightDataGI> lightsOutput) =>
         {

@@ -525,6 +525,7 @@ namespace UnityEngine.Rendering.Universal
             cmd.DisableShaderKeyword(ShaderKeywordStrings.SoftShadows);
             cmd.DisableShaderKeyword(ShaderKeywordStrings.MixedLightingSubtractive);
             cmd.DisableShaderKeyword(ShaderKeywordStrings.LinearToSRGBConversion);
+            cmd.DisableShaderKeyword(ShaderKeywordStrings.SRGBToLinearConversion); //Add by: Yumiao
         }
 
         internal void Clear(CameraRenderType cameraType)

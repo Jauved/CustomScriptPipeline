@@ -587,6 +587,9 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = false;
                 cameraData.antialiasing = AntialiasingMode.None;
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
+                //Add by: Yumiao
+                cameraData.forceNotSRGB = false;
+                //End Add
             }
             else if (baseAdditionalCameraData != null)
             {
@@ -596,6 +599,11 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = baseAdditionalCameraData.dithering;
                 cameraData.antialiasing = baseAdditionalCameraData.antialiasing;
                 cameraData.antialiasingQuality = baseAdditionalCameraData.antialiasingQuality;
+                //Add by: Yumiao 传递ForceNotSRGB参数
+                //Todo 这里写在ForwardRenderer中是个隐患, 如果可能的话, 整个移动到scriptableRenderer中
+                var cur_renderer = baseAdditionalCameraData.scriptableRenderer as ForwardRenderer;
+                cameraData.forceNotSRGB = cur_renderer.ForceNotSRGB;
+                //End Add
             }
             else
             {
@@ -605,6 +613,9 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = false;
                 cameraData.antialiasing = AntialiasingMode.None;
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
+                //Add by: Yumiao
+                cameraData.forceNotSRGB = false;
+                //End Add
             }
 
 
@@ -639,8 +650,10 @@ namespace UnityEngine.Rendering.Universal
             cameraData.captureActions = CameraCaptureBridge.GetCaptureActions(baseCamera);
 
             bool needsAlphaChannel = Graphics.preserveFramebufferAlpha;
+            //Add by Yumiao
             cameraData.cameraTargetDescriptor = CreateRenderTextureDescriptor(baseCamera, cameraData.renderScale,
-                cameraData.isStereoEnabled, cameraData.isHdrEnabled, msaaSamples, needsAlphaChannel);
+                cameraData.isStereoEnabled, cameraData.isHdrEnabled, msaaSamples, needsAlphaChannel, cameraData.forceNotSRGB);
+            //End Add
         }
 
         /// <summary>

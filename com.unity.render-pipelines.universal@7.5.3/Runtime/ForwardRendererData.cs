@@ -59,6 +59,7 @@ namespace UnityEngine.Rendering.Universal
         [SerializeField] LayerMask m_TransparentLayerMask = -1;
         [SerializeField] StencilStateData m_DefaultStencilState = new StencilStateData();
         [SerializeField] bool m_ShadowTransparentReceive = true;
+        [SerializeField] bool m_ForceNotSRGB = false; //Add by Yumiao
 
         protected override ScriptableRenderer Create()
         {
@@ -120,6 +121,18 @@ namespace UnityEngine.Rendering.Universal
                 m_ShadowTransparentReceive = value;
             }
         }
+
+        //Add by: Yumiao 
+        public bool forceNotSRGB
+        {
+            get => m_ForceNotSRGB;
+            set
+            {
+                SetDirty();
+                m_ForceNotSRGB = value;
+            }
+        }
+        //End Add
 
         protected override void OnEnable()
         {
