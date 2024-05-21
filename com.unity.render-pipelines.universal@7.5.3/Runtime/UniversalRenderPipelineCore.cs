@@ -166,8 +166,10 @@ namespace UnityEngine.Rendering.Universal
         public bool resolveFinalTarget;
         
         //Add by Yumiao
+        public RenderTextureDescriptor cameraTargetDescriptorForceNotSRGB;
         public bool forceNotSRGB;
         public bool forceRenderToTexture;
+        public bool isBaseCamera;
         //End Add
     }
 
