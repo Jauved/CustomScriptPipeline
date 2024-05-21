@@ -339,7 +339,7 @@ namespace UnityEngine.Rendering.Universal
                     var baseCameraRendererType = baseCameraAdditionalData?.scriptableRenderer.GetType();
                     bool shouldUpdateCameraStack = false;
 
-                    for (int i = 0; i < cameraStack.Count; ++i)
+                    for (int i = 0; i < cameraStack.Count; ++i)//Add Commit by: Yumiao 注意++i, 这里是从1开始.
                     {
                         Camera currCamera = cameraStack[i];
                         if (currCamera == null)
@@ -405,6 +405,7 @@ namespace UnityEngine.Rendering.Universal
             if (asset.useAdaptivePerformance)
                 ApplyAdaptivePerformance(ref baseCameraData);
 #endif
+            baseCameraData.isBaseCamera = true;//Add By: Yumiao 用于判断是否是Base相机
             RenderSingleCamera(context, baseCameraData, anyPostProcessingEnabled);
             EndCameraRendering(context, baseCamera);
 
@@ -422,6 +423,7 @@ namespace UnityEngine.Rendering.Universal
                 // Camera is overlay and enabled
                 if (currCameraData != null)
                 {
+                    baseCameraData.isBaseCamera = false;//Add by: Yumiao 用于判断是否是Base相机
                     // Copy base settings from base camera data and initialize initialize remaining specific settings for this camera type.
                     CameraData overlayCameraData = baseCameraData;
                     bool lastCamera = i == lastActiveOverlayCameraIndex;
@@ -654,8 +656,13 @@ namespace UnityEngine.Rendering.Universal
 
             bool needsAlphaChannel = Graphics.preserveFramebufferAlpha;
             //Modify by: Yumiao 新写了CreateRenderTextureDescriptor方法的变体并调用
+            //Purpose: 
+            //1. 添加forceNotSRGB, 是为了在Linear空间下, 仍旧可以强制获取非sRGB修正的RednerBuffer.
+            //2. 添加cameraTargetDescriptorForceNotSRGB, 是为了在将场景相机渲染到RT的时候, 能得到一张同格式的, 但是没有sRGB修正的RenderTextureDescriptor.
             cameraData.cameraTargetDescriptor = CreateRenderTextureDescriptor(baseCamera, cameraData.renderScale,
                 cameraData.isStereoEnabled, cameraData.isHdrEnabled, msaaSamples, needsAlphaChannel, cameraData.forceNotSRGB);
+            cameraData.cameraTargetDescriptorForceNotSRGB = CreateRenderTextureDescriptor(baseCamera, cameraData.renderScale,
+                cameraData.isStereoEnabled, cameraData.isHdrEnabled, msaaSamples, needsAlphaChannel, true);
             //End Add
         }
 
