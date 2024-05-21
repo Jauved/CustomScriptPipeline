@@ -405,7 +405,7 @@ namespace UnityEngine.Rendering.Universal
             if (asset.useAdaptivePerformance)
                 ApplyAdaptivePerformance(ref baseCameraData);
 #endif
-            baseCameraData.isBaseCamera = true;//Add By: Yumiao 用于判断是否是Base相机
+            baseCameraData.isBaseCamera = true;//Add By: Yumiao Purpose: IsBaseCamera 用于判断是否是Base相机
             RenderSingleCamera(context, baseCameraData, anyPostProcessingEnabled);
             EndCameraRendering(context, baseCamera);
 
@@ -423,7 +423,7 @@ namespace UnityEngine.Rendering.Universal
                 // Camera is overlay and enabled
                 if (currCameraData != null)
                 {
-                    baseCameraData.isBaseCamera = false;//Add by: Yumiao 用于判断是否是Base相机
+                    baseCameraData.isBaseCamera = false;//Add by: Yumiao IsBaseCamera 用于判断是否是Base相机
                     // Copy base settings from base camera data and initialize initialize remaining specific settings for this camera type.
                     CameraData overlayCameraData = baseCameraData;
                     bool lastCamera = i == lastActiveOverlayCameraIndex;
@@ -589,7 +589,7 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = false;
                 cameraData.antialiasing = AntialiasingMode.None;
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
-                //Add by: Yumiao
+                //Add by: Yumiao Purpose: forceNotSRGB/forceRenderToTexture
                 cameraData.forceNotSRGB = false;
                 cameraData.forceRenderToTexture = false;
                 //End Add
@@ -602,7 +602,8 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = baseAdditionalCameraData.dithering;
                 cameraData.antialiasing = baseAdditionalCameraData.antialiasing;
                 cameraData.antialiasingQuality = baseAdditionalCameraData.antialiasingQuality;
-                //Add by: Yumiao 传递ForceNotSRGB和ForceRenderToTexture参数, 因为RenderFeature能接受的比较方便的就是CameraData中的数据
+                //Add by: Yumiao Purpose: forceNotSRGB/forceRenderToTexture
+                //Purpose: 传递ForceNotSRGB和ForceRenderToTexture参数, 因为RenderFeature能接受的比较方便的就是CameraData中的数据
                 //Todo 这里写在ForwardRenderer中是个隐患, 如果可能的话, 整个移动到scriptableRenderer中
                 var cur_renderer = baseAdditionalCameraData.scriptableRenderer as ForwardRenderer;
                 cameraData.forceNotSRGB = cur_renderer.ForceNotSRGB;
@@ -617,7 +618,7 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = false;
                 cameraData.antialiasing = AntialiasingMode.None;
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
-                //Add by: Yumiao
+                //Add by: Yumiao Purpose: forceNotSRGB/forceRenderToTexture
                 cameraData.forceNotSRGB = false;
                 cameraData.forceRenderToTexture = false;
                 //End Add

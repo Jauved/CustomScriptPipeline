@@ -165,7 +165,12 @@ namespace UnityEngine.Rendering.Universal
         /// </summary>
         public bool resolveFinalTarget;
         
-        //Add by Yumiao
+        //Add by: Yumiao Purpose: forceNotSRGB/forceRenderToTexture/isBaseCamera
+        //Purpose: 添加需要用到的额外的cameraData的字段,
+        //cameraTargetDescriptorForceNotSRGB用于LinearToSRGBFeature的渲染目标格式设置
+        //forceNotSRGB用于标识Gamma相机
+        //forceRenderToTexture用于标识渲染到贴图的相机(Linear相机)
+        //isBaseCamera用于标识SRGBToCamera的启用时机, 让其只启用一次
         public RenderTextureDescriptor cameraTargetDescriptorForceNotSRGB;
         public bool forceNotSRGB;
         public bool forceRenderToTexture;
@@ -235,7 +240,7 @@ namespace UnityEngine.Rendering.Universal
         public static readonly string DepthMsaa8 = "_DEPTH_MSAA_8";
 
         public static readonly string LinearToSRGBConversion = "_LINEAR_TO_SRGB_CONVERSION";
-        public static readonly string SRGBToLinearConversion = "_SRGB_TO_LINEAR_CONVERSION";//Add by Yumiao
+        public static readonly string SRGBToLinearConversion = "_SRGB_TO_LINEAR_CONVERSION";//Add by: Yumiao Purpose: SRGBToLinear
         [Obsolete("The _KILL_ALPHA shader keyword is deprecated in the Universal Render Pipeline.")]
         public static readonly string KillAlpha = "_KILL_ALPHA";
 
@@ -414,8 +419,8 @@ namespace UnityEngine.Rendering.Universal
             return desc;
         }
         
-        //Add by: Yumiao
-        //Purpose: 添加强制使用非HDR以及强制使用非sRGB渲染, 用于Linear空间下的UI渲染
+        //Add by: Yumiao Purpose: forceNotSRGB
+        //Purpose: 添加强制使用非HDR(默认为false, 后续可扩展)以及强制使用非sRGB渲染, 用于强制UI渲染在Gamma空间下
         /// <summary>
         /// 自定义CreateRenderTextureDescriptor()函数, 添加了forceNotHDR和forceNotSRGB, 用于线性空间下的UI渲染
         /// </summary>
@@ -457,10 +462,10 @@ namespace UnityEngine.Rendering.Universal
                 else
                     hdrFormat = SystemInfo.GetGraphicsFormat(DefaultFormat.HDR); // This might actually be a LDR format on old devices.
 
-                desc.graphicsFormat = isHdrEnabled && !forceNotHDR ? hdrFormat : renderTextureFormatDefault;//Add by: Yumiao
+                desc.graphicsFormat = isHdrEnabled && !forceNotHDR ? hdrFormat : renderTextureFormatDefault;//Add by: Yumiao Purpose: forceNotSRGB
                 desc.depthBufferBits = 32;
                 desc.msaaSamples = msaaSamples;
-                desc.sRGB = (QualitySettings.activeColorSpace == ColorSpace.Linear) && !forceNotSRGB;//Add by: Yumiao
+                desc.sRGB = (QualitySettings.activeColorSpace == ColorSpace.Linear) && !forceNotSRGB;//Add by: Yumiao Purpose: forceNotSRGB
             }
             else
             {

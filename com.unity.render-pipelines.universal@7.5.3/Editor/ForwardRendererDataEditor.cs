@@ -17,12 +17,12 @@ namespace UnityEditor.Rendering.Universal
             public static readonly GUIContent TransparentMask = new GUIContent("Transparent Layer Mask", "Controls which transparent layers this renderer draws.");
             public static readonly GUIContent defaultStencilStateLabel = EditorGUIUtility.TrTextContent("Default Stencil State", "Configure stencil state for the opaque and transparent render passes.");
             public static readonly GUIContent shadowTransparentReceiveLabel = EditorGUIUtility.TrTextContent("Transparent Receive Shadows", "When disabled, none of the transparent objects will receive shadows.");
-            //Add by: Yumiao
-            //Purpose:
+            //Add by: Yumiao forceNotSRGB/forceRenderToTexture
+            //Purpose: forceNotSRGB/forceRenderToTexture
             //通过forceNotSRGBLabel, 从RendererData->Renderer->UniversalAdditionalCameraData->CameraData->UniversalRendererPipeline
-            //通过forceRenderToTexture, 强制跳过相机的FinalBlit阶段,标识为渲染到图, 而图可以被其他BaseCamera调用(比如颜色空间转换)
+            //通过forceRenderToTextureLabel, 强制跳过相机的FinalBlit阶段,标识为渲染到图, 而图可以被其他BaseCamera调用(比如颜色空间转换)
             public static readonly GUIContent forceNotSRGBLabel = EditorGUIUtility.TrTextContent("Force not sRGB fixed", "When Enable, In Linear Space, Force Renderer without sRGB fixed");
-            public static readonly GUIContent forceRenderToTexture = EditorGUIUtility.TrTextContent("Force Render to Texture", "When Enable, Disable The FinalBlitPass");
+            public static readonly GUIContent forceRenderToTextureLabel = EditorGUIUtility.TrTextContent("Force Render to Texture", "When Enable, Disable The FinalBlitPass");
             //End Add
 
         }
@@ -33,8 +33,8 @@ namespace UnityEditor.Rendering.Universal
         SerializedProperty m_PostProcessData;
         SerializedProperty m_Shaders;
         SerializedProperty m_ShadowTransparentReceiveProp;
-        SerializedProperty m_ForceNotSRGBProp; //Add by: Yumiao
-        SerializedProperty m_ForceRenderToTextureProp; //Add by: Yumiao
+        SerializedProperty m_ForceNotSRGBProp; //Add by: Yumiao Purpose: forceNotSRGB
+        SerializedProperty m_ForceRenderToTextureProp; //Add by: Yumiao Purpose: forceRenderToTexture
 
         private void OnEnable()
         {
@@ -44,8 +44,8 @@ namespace UnityEditor.Rendering.Universal
             m_PostProcessData = serializedObject.FindProperty("postProcessData");
             m_Shaders = serializedObject.FindProperty("shaders");
             m_ShadowTransparentReceiveProp = serializedObject.FindProperty("m_ShadowTransparentReceive");
-            m_ForceNotSRGBProp = serializedObject.FindProperty("m_ForceNotSRGB"); //Add by: Yumiao
-            m_ForceRenderToTextureProp = serializedObject.FindProperty("m_ForceRenderToTexture"); //Add by: Yumiao
+            m_ForceNotSRGBProp = serializedObject.FindProperty("m_ForceNotSRGB"); //Add by: Yumiao Purpose: forceNotSRGB
+            m_ForceRenderToTextureProp = serializedObject.FindProperty("m_ForceRenderToTexture"); //Add by: Yumiao Purpose: forceRenderToTexture
         }
 
         public override void OnInspectorGUI()
@@ -78,11 +78,12 @@ namespace UnityEditor.Rendering.Universal
             EditorGUI.indentLevel--;
             EditorGUILayout.Space();
 
-            //Add by: Yumiao
+            //Add by: Yumiao forceNotSRGB/forceRenderToTexture
+            //Purpose: 面板
             EditorGUILayout.LabelField("Advanced options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(m_ForceNotSRGBProp, Styles.forceNotSRGBLabel);
-            EditorGUILayout.PropertyField(m_ForceRenderToTextureProp, Styles.forceRenderToTexture);
+            EditorGUILayout.PropertyField(m_ForceRenderToTextureProp, Styles.forceRenderToTextureLabel);
             EditorGUI.indentLevel--;
             EditorGUILayout.Space();
             //End Add
