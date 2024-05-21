@@ -27,7 +27,7 @@ namespace UnityEngine.Rendering.Universal
         PostProcessPass m_FinalPostProcessPass;
         FinalBlitPass m_FinalBlitPass;
         CapturePass m_CapturePass;
-        
+
         //Add by: Yumiao
         public bool ForceNotSRGB
         {
@@ -83,8 +83,8 @@ namespace UnityEngine.Rendering.Universal
             m_DefaultStencilState.SetFailOperation(stencilData.failOperation);
             m_DefaultStencilState.SetZFailOperation(stencilData.zFailOperation);
 
-            m_ForceNotSRGB = data.forceNotSRGB;//Add by: Yumiao
-            m_ForceRenderToTexture = data.forceRenderToTexture;//Add by: Yumiao
+            m_ForceNotSRGB = data.forceNotSRGB; //Add by: Yumiao
+            m_ForceRenderToTexture = data.forceRenderToTexture; //Add by: Yumiao
 
             // Note: Since all custom render passes inject first and we have stable sort,
             // we inject the builtin passes in the before events.
@@ -167,7 +167,7 @@ namespace UnityEngine.Rendering.Universal
 
                 for (int i = 0; i < rendererFeatures.Count; ++i)
                 {
-                    if(rendererFeatures[i].isActive)
+                    if (rendererFeatures[i].isActive)
                         rendererFeatures[i].AddRenderPasses(this, ref renderingData);
                 }
 
@@ -226,7 +226,7 @@ namespace UnityEngine.Rendering.Universal
             isRunningHololens = UniversalRenderPipeline.IsRunningHololens(camera);
 #endif
             bool createColorTexture = RequiresIntermediateColorTexture(ref cameraData);
-            createColorTexture |= (rendererFeatures.Count != 0 && !isRunningHololens);
+            createColorTexture |= (rendererFeatures.Count != 0 && !isRunningHololens);//Add Commit by: Yumiao 一旦加了rendererFeature, 就会重声明ColorTexture, 即会导致Final Blit.
             createColorTexture &= !isPreviewCamera;
 
             // If camera requires depth and there's no depth pre-pass we create a depth texture that can be read later by effect requiring it.
@@ -271,14 +271,14 @@ namespace UnityEngine.Rendering.Universal
 
             for (int i = 0; i < rendererFeatures.Count; ++i)
             {
-                if(rendererFeatures[i].isActive)
+                if (rendererFeatures[i].isActive)
                     rendererFeatures[i].AddRenderPasses(this, ref renderingData);
             }
 
             int count = activeRenderPassQueue.Count;
             for (int i = count - 1; i >= 0; i--)
             {
-                if(activeRenderPassQueue[i] == null)
+                if (activeRenderPassQueue[i] == null)
                     activeRenderPassQueue.RemoveAt(i);
             }
             bool hasPassesAfterPostProcessing = activeRenderPassQueue.Find(x => x.renderPassEvent == RenderPassEvent.AfterRendering) != null;
@@ -352,16 +352,17 @@ namespace UnityEngine.Rendering.Universal
             }
             EnqueuePass(m_OnRenderObjectCallbackPass);
 
-            bool lastCameraInTheStack = cameraData.resolveFinalTarget;//Add Commit by: Yumiao 实际这里就是lastCamera, 是否最后一个相机
+            bool lastCameraInTheStack = cameraData.resolveFinalTarget; //Add Commit by: Yumiao 实际这里就是lastCamera, 是否最后一个相机
             bool hasCaptureActions = renderingData.cameraData.captureActions != null && lastCameraInTheStack;
             bool applyFinalPostProcessing = anyPostProcessing && lastCameraInTheStack &&
-                                     renderingData.cameraData.antialiasing == AntialiasingMode.FastApproximateAntialiasing;
+                                            renderingData.cameraData.antialiasing == AntialiasingMode.FastApproximateAntialiasing;
 
             // When post-processing is enabled we can use the stack to resolve rendering to camera target (screen or RT).
             // However when there are render passes executing after post we avoid resolving to screen so rendering continues (before sRGBConvertion etc)
             bool resolvePostProcessingToCameraTarget = !hasCaptureActions && !hasPassesAfterPostProcessing && !applyFinalPostProcessing;
 
-            #region Post-processing v2 support
+#region Post-processing v2 support
+
 #if POST_PROCESSING_STACK_2_0_0_OR_NEWER
             // To keep things clean we'll separate the logic from builtin PP and PPv2 - expect some copy/pasting
             if (postProcessFeatureSet == PostProcessingFeatureSet.PostProcessingV2)
@@ -406,63 +407,64 @@ namespace UnityEngine.Rendering.Universal
             }
             else
 #endif
-            #endregion
+
+#endregion
             {
 
-            if (lastCameraInTheStack)
-            {
-                // Post-processing will resolve to final target. No need for final blit pass.
-                if (applyPostProcessing)
+                if (lastCameraInTheStack)
                 {
-                    var destination = resolvePostProcessingToCameraTarget ? RenderTargetHandle.CameraTarget : m_AfterPostProcessColor;
+                    // Post-processing will resolve to final target. No need for final blit pass.
+                    if (applyPostProcessing)
+                    {
+                        var destination = resolvePostProcessingToCameraTarget ? RenderTargetHandle.CameraTarget : m_AfterPostProcessColor;
 
-                    // if resolving to screen we need to be able to perform sRGBConvertion in post-processing if necessary
-                    bool doSRGBConvertion = resolvePostProcessingToCameraTarget;
-                    m_PostProcessPass.Setup(cameraTargetDescriptor, m_ActiveCameraColorAttachment, destination, m_ActiveCameraDepthAttachment, m_ColorGradingLut, applyFinalPostProcessing, doSRGBConvertion);
+                        // if resolving to screen we need to be able to perform sRGBConvertion in post-processing if necessary
+                        bool doSRGBConvertion = resolvePostProcessingToCameraTarget;
+                        m_PostProcessPass.Setup(cameraTargetDescriptor, m_ActiveCameraColorAttachment, destination, m_ActiveCameraDepthAttachment, m_ColorGradingLut, applyFinalPostProcessing, doSRGBConvertion);
+                        EnqueuePass(m_PostProcessPass);
+                    }
+
+                    if (renderingData.cameraData.captureActions != null)
+                    {
+                        m_CapturePass.Setup(m_ActiveCameraColorAttachment);
+                        EnqueuePass(m_CapturePass);
+                    }
+
+                    // if we applied post-processing for this camera it means current active texture is m_AfterPostProcessColor
+                    var sourceForFinalPass = (applyPostProcessing) ? m_AfterPostProcessColor : m_ActiveCameraColorAttachment;
+
+                    // Do FXAA or any other final post-processing effect that might need to run after AA.
+                    if (applyFinalPostProcessing)
+                    {
+                        m_FinalPostProcessPass.SetupFinalPass(sourceForFinalPass);
+                        EnqueuePass(m_FinalPostProcessPass);
+                    }
+
+                    // if post-processing then we already resolved to camera target while doing post.
+                    // Also only do final blit if camera is not rendering to RT.
+                    bool cameraTargetResolved =
+                        // final PP always blit to camera target
+                        applyFinalPostProcessing ||
+                        // no final PP but we have PP stack. In that case it blit unless there are render pass after PP
+                        (applyPostProcessing && !hasPassesAfterPostProcessing) ||
+                        // offscreen camera rendering to a texture, we don't need a blit pass to resolve to screen
+                        m_ActiveCameraColorAttachment == RenderTargetHandle.CameraTarget //;//Add Commit by: Yumiao, 如果当前激活的RTH=当前相机的RTH, 那么就要走FinalBlit
+                        || m_ForceRenderToTexture; //Add Commit by: Yumiao, 如果当前是ForceRenderToTex, 那么就不使用.
+                    
+                    // We need final blit to resolve to screen
+                    if (!cameraTargetResolved)
+                    {
+                        m_FinalBlitPass.Setup(cameraTargetDescriptor, sourceForFinalPass);
+                        EnqueuePass(m_FinalBlitPass);
+                    }
+                }
+
+                // stay in RT so we resume rendering on stack after post-processing
+                else if (applyPostProcessing)
+                {
+                    m_PostProcessPass.Setup(cameraTargetDescriptor, m_ActiveCameraColorAttachment, m_AfterPostProcessColor, m_ActiveCameraDepthAttachment, m_ColorGradingLut, false, false);
                     EnqueuePass(m_PostProcessPass);
                 }
-
-                if (renderingData.cameraData.captureActions != null)
-                {
-                    m_CapturePass.Setup(m_ActiveCameraColorAttachment);
-                    EnqueuePass(m_CapturePass);
-                }
-
-                // if we applied post-processing for this camera it means current active texture is m_AfterPostProcessColor
-                var sourceForFinalPass = (applyPostProcessing) ? m_AfterPostProcessColor : m_ActiveCameraColorAttachment;
-
-                // Do FXAA or any other final post-processing effect that might need to run after AA.
-                if (applyFinalPostProcessing)
-                {
-                    m_FinalPostProcessPass.SetupFinalPass(sourceForFinalPass);
-                    EnqueuePass(m_FinalPostProcessPass);
-                }
-
-                // if post-processing then we already resolved to camera target while doing post.
-                // Also only do final blit if camera is not rendering to RT.
-                bool cameraTargetResolved =
-                    // final PP always blit to camera target
-                    applyFinalPostProcessing ||
-                    // no final PP but we have PP stack. In that case it blit unless there are render pass after PP
-                    (applyPostProcessing && !hasPassesAfterPostProcessing) ||
-                    // offscreen camera rendering to a texture, we don't need a blit pass to resolve to screen
-                    m_ActiveCameraColorAttachment == RenderTargetHandle.CameraTarget //;//Add Commit by: Yumiao, 如果当前激活的RTH=当前相机的RTH, 那么就要走FinalBlit
-                    || m_ForceRenderToTexture;//Add Commit by: Yumiao, 如果当前是ForceRenderToTex, 那么就不使用.
-
-                // We need final blit to resolve to screen
-                if (!cameraTargetResolved)
-                {
-                    m_FinalBlitPass.Setup(cameraTargetDescriptor, sourceForFinalPass);
-                    EnqueuePass(m_FinalBlitPass);
-                }
-            }
-
-            // stay in RT so we resume rendering on stack after post-processing
-            else if (applyPostProcessing)
-            {
-                m_PostProcessPass.Setup(cameraTargetDescriptor, m_ActiveCameraColorAttachment, m_AfterPostProcessColor, m_ActiveCameraDepthAttachment, m_ColorGradingLut, false, false);
-                EnqueuePass(m_PostProcessPass);
-            }
 
             }
 
@@ -485,7 +487,7 @@ namespace UnityEngine.Rendering.Universal
 
         /// <inheritdoc />
         public override void SetupCullingParameters(ref ScriptableCullingParameters cullingParameters,
-            ref CameraData cameraData)
+                                                    ref CameraData cameraData)
         {
             // TODO: PerObjectCulling also affect reflection probes. Enabling it for now.
             // if (asset.additionalLightsRenderingMode == LightRenderingMode.Disabled ||
@@ -529,6 +531,10 @@ namespace UnityEngine.Rendering.Universal
         {
             CommandBuffer cmd = CommandBufferPool.Get(k_CreateCameraTextures);
             var descriptor = cameraData.cameraTargetDescriptor;
+            //Add by: Yumiao
+            //Purpose: 这里需要根据是否是ForceRenderToTexture, 来判断是否需要创建RT
+            // var descriptorForceNotSRGB = cameraData.cameraTargetDescriptorForceNotSRGB;
+            //End Add
             int msaaSamples = descriptor.msaaSamples;
             if (m_ActiveCameraColorAttachment != RenderTargetHandle.CameraTarget)
             {
@@ -538,6 +544,18 @@ namespace UnityEngine.Rendering.Universal
                 colorDescriptor.autoGenerateMips = false;
                 colorDescriptor.depthBufferBits = (useDepthRenderBuffer) ? k_DepthStencilBufferBits : 0;
                 cmd.GetTemporaryRT(m_ActiveCameraColorAttachment.id, colorDescriptor, FilterMode.Bilinear);
+                //最终决定在RendererFeature中去创建并回收RT, 让整个管线更解耦.
+                //Add by: Yumiao
+                //Purpose: 这里需要根据是否是ForceRenderToTexture, 来判断是否需要创建RT
+                // if (cameraData.forceRenderToTexture)
+                // {
+                //     var colorForceNotSRGB = descriptorForceNotSRGB;
+                //     colorForceNotSRGB.useMipMap = false;
+                //     colorForceNotSRGB.autoGenerateMips = false;
+                //     colorForceNotSRGB.depthBufferBits = 0;
+                //     cmd.GetTemporaryRT(...);
+                // }
+                //End Add
             }
 
             if (m_ActiveCameraDepthAttachment != RenderTargetHandle.CameraTarget)

@@ -59,8 +59,8 @@ Shader "Hidden/Universal Render Pipeline/Blit"
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
                 half4 col = SAMPLE_TEXTURE2D_X(_BlitTex, sampler_BlitTex, input.uv);
                 
-                //Add by Yumiao Todo 这里测试的时候复用Blit, 没有单独写一个BlitShader
-                //后续看是否需要单独为sRGB修正做一个Blit着色器
+                //Add by Yumiao
+                //Purpose: 从这一步重新汇入Unity默认管线
                 #ifdef _SRGB_TO_LINEAR_CONVERSION
                 col = SRGBToLinear(col);
                 #endif
