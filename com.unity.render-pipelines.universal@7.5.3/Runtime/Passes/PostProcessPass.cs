@@ -405,7 +405,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     // For now, when render post-processing in the middle of the camera stack (not resolving to screen)
                     // we do an extra blit to ping pong results back to color texture. In future we should allow a Swap of the current active color texture
                     // in the pipeline to avoid this extra blit.
-                    if (!finishPostProcessOnScreen)
+                    if (!finishPostProcessOnScreen || cameraData.forceRenderToTexture)//Modify by: Yumiao 原条件没有|| cameraData.forceRenderToTexture, 这里是, 如果需要渲染到图, 那么强制后处理渲染到Buffer
                     {
                         cmd.SetGlobalTexture("_BlitTex", cameraTarget);
                         cmd.SetRenderTarget(m_Source.id, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
