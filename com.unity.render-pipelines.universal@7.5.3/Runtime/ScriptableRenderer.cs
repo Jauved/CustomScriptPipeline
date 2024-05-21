@@ -525,7 +525,7 @@ namespace UnityEngine.Rendering.Universal
             cmd.DisableShaderKeyword(ShaderKeywordStrings.SoftShadows);
             cmd.DisableShaderKeyword(ShaderKeywordStrings.MixedLightingSubtractive);
             cmd.DisableShaderKeyword(ShaderKeywordStrings.LinearToSRGBConversion);
-            cmd.DisableShaderKeyword(ShaderKeywordStrings.SRGBToLinearConversion); //Add by: Yumiao
+            cmd.DisableShaderKeyword(ShaderKeywordStrings.SRGBToLinearConversion); //Add by: Yumiao Purpose: SRGBToLinear 在相机渲染开始时统一重置参数
         }
 
         internal void Clear(CameraRenderType cameraType)

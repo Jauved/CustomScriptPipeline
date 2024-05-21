@@ -28,7 +28,7 @@ namespace UnityEngine.Rendering.Universal
         FinalBlitPass m_FinalBlitPass;
         CapturePass m_CapturePass;
 
-        //Add by: Yumiao
+        //Add by: Yumiao Purpose: forceNotSRGB
         public bool ForceNotSRGB
         {
             get => m_ForceNotSRGB;
@@ -83,8 +83,8 @@ namespace UnityEngine.Rendering.Universal
             m_DefaultStencilState.SetFailOperation(stencilData.failOperation);
             m_DefaultStencilState.SetZFailOperation(stencilData.zFailOperation);
 
-            m_ForceNotSRGB = data.forceNotSRGB; //Add by: Yumiao
-            m_ForceRenderToTexture = data.forceRenderToTexture; //Add by: Yumiao
+            m_ForceNotSRGB = data.forceNotSRGB; //Add by: Yumiao Purpose: forceNotSRGB
+            m_ForceRenderToTexture = data.forceRenderToTexture; //Add by: Yumiao Purpose: forceRenderToTexture
 
             // Note: Since all custom render passes inject first and we have stable sort,
             // we inject the builtin passes in the before events.
@@ -531,10 +531,6 @@ namespace UnityEngine.Rendering.Universal
         {
             CommandBuffer cmd = CommandBufferPool.Get(k_CreateCameraTextures);
             var descriptor = cameraData.cameraTargetDescriptor;
-            //Add by: Yumiao
-            //Purpose: 这里需要根据是否是ForceRenderToTexture, 来判断是否需要创建RT
-            // var descriptorForceNotSRGB = cameraData.cameraTargetDescriptorForceNotSRGB;
-            //End Add
             int msaaSamples = descriptor.msaaSamples;
             if (m_ActiveCameraColorAttachment != RenderTargetHandle.CameraTarget)
             {
@@ -544,18 +540,6 @@ namespace UnityEngine.Rendering.Universal
                 colorDescriptor.autoGenerateMips = false;
                 colorDescriptor.depthBufferBits = (useDepthRenderBuffer) ? k_DepthStencilBufferBits : 0;
                 cmd.GetTemporaryRT(m_ActiveCameraColorAttachment.id, colorDescriptor, FilterMode.Bilinear);
-                //最终决定在RendererFeature中去创建并回收RT, 让整个管线更解耦.
-                //Add by: Yumiao
-                //Purpose: 这里需要根据是否是ForceRenderToTexture, 来判断是否需要创建RT
-                // if (cameraData.forceRenderToTexture)
-                // {
-                //     var colorForceNotSRGB = descriptorForceNotSRGB;
-                //     colorForceNotSRGB.useMipMap = false;
-                //     colorForceNotSRGB.autoGenerateMips = false;
-                //     colorForceNotSRGB.depthBufferBits = 0;
-                //     cmd.GetTemporaryRT(...);
-                // }
-                //End Add
             }
 
             if (m_ActiveCameraDepthAttachment != RenderTargetHandle.CameraTarget)

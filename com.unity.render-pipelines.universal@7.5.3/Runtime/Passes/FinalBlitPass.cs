@@ -56,7 +56,8 @@ namespace UnityEngine.Rendering.Universal.Internal
 #endif
             CommandBuffer cmd = CommandBufferPool.Get(m_ProfilerTag);
 
-            //Add by: Yumiao, 如果forceNotSRGB激活, 则先转入Linear,此时, 重新汇入Unity管线, 后续都不用修改
+            //Add by: Yumiao Purpose: forceNotSRGB
+            //Purpose: 如果forceNotSRGB激活, 则先转入Linear,此时, 重新汇入Unity管线
             if (cameraData.forceNotSRGB)
             {
                 cmd.EnableShaderKeyword(ShaderKeywordStrings.SRGBToLinearConversion);
