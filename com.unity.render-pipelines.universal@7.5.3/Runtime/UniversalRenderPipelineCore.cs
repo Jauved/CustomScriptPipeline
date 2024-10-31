@@ -422,7 +422,7 @@ namespace UnityEngine.Rendering.Universal
         //Add by: Yumiao Purpose: forceNotSRGB
         //Purpose: 添加强制使用非HDR(默认为false, 后续可扩展)以及强制使用非sRGB渲染, 用于强制UI渲染在Gamma空间下
         /// <summary>
-        /// 自定义CreateRenderTextureDescriptor()函数, 添加了forceNotHDR和forceNotSRGB, 用于线性空间下的UI渲染
+        /// 自定义CreateRenderTextureDescriptor()函数, 添加了forceNotHDR和forceNotSRGB, 用于线性空间下的GammaUI渲染
         /// </summary>
         /// <param name="camera"></param>
         /// <param name="renderScale"></param>
@@ -462,7 +462,7 @@ namespace UnityEngine.Rendering.Universal
                 else
                     hdrFormat = SystemInfo.GetGraphicsFormat(DefaultFormat.HDR); // This might actually be a LDR format on old devices.
 
-                desc.graphicsFormat = isHdrEnabled && !forceNotHDR ? hdrFormat : renderTextureFormatDefault;//Add by: Yumiao Purpose: forceNotSRGB
+                desc.graphicsFormat = isHdrEnabled && !forceNotHDR ? hdrFormat : renderTextureFormatDefault;//Add by: Yumiao Purpose: forceNotHDR
                 desc.depthBufferBits = 32;
                 desc.msaaSamples = msaaSamples;
                 desc.sRGB = (QualitySettings.activeColorSpace == ColorSpace.Linear) && !forceNotSRGB;//Add by: Yumiao Purpose: forceNotSRGB

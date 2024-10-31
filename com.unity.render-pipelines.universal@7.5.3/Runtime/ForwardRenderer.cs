@@ -28,7 +28,9 @@ namespace UnityEngine.Rendering.Universal
         FinalBlitPass m_FinalBlitPass;
         CapturePass m_CapturePass;
 
-        //Add by: Yumiao Purpose: forceNotSRGB
+        //Todo 不够优雅, ForwardRenderer中并没有记录bool的先例, 且最后调用的时候要将ScriptableRenderer as ForwardRenderer才能调用到
+        //Todo 仿照m_DefaultStencilState的调用方式? 抽象一个结构体或者类来存储这个设置看是否可行
+        //Add by: Yumiao Purpose: forceNotSRGB/forceRenderToTexture
         public bool ForceNotSRGB
         {
             get => m_ForceNotSRGB;
@@ -448,8 +450,8 @@ namespace UnityEngine.Rendering.Universal
                         // no final PP but we have PP stack. In that case it blit unless there are render pass after PP
                         (applyPostProcessing && !hasPassesAfterPostProcessing) ||
                         // offscreen camera rendering to a texture, we don't need a blit pass to resolve to screen
-                        m_ActiveCameraColorAttachment == RenderTargetHandle.CameraTarget //;//Add Commit by: Yumiao, 如果当前激活的RTH=当前相机的RTH, 那么就要走FinalBlit
-                        || m_ForceRenderToTexture; //Add Commit by: Yumiao, 如果当前是ForceRenderToTex, 那么就不使用.
+                        m_ActiveCameraColorAttachment == RenderTargetHandle.CameraTarget //;//Modify Add by: Yumiao Purpose: forceRenderToTexture 如果当前激活的RTH=当前相机的RTH, 那么就要走FinalBlit
+                        || m_ForceRenderToTexture; //Add by: Yumiao Purpose: forceRenderToTexture 如果当前是ForceRenderToTex, 那么就不使用.
                     
                     // We need final blit to resolve to screen
                     if (!cameraTargetResolved)
