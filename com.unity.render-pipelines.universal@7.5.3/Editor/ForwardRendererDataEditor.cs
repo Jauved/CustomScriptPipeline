@@ -22,7 +22,7 @@ namespace UnityEditor.Rendering.Universal
             //通过forceNotSRGBLabel, 从RendererData->Renderer->UniversalAdditionalCameraData->CameraData->UniversalRendererPipeline
             //通过forceRenderToTextureLabel, 强制跳过相机的FinalBlit阶段,标识为渲染到图, 而图可以被其他BaseCamera调用(比如颜色空间转换)
             public static readonly GUIContent forceNotSRGBLabel = EditorGUIUtility.TrTextContent("Force not sRGB fixed", "When Enable, In Linear Space, Force Renderer without sRGB fixed");
-            public static readonly GUIContent forceRenderToTextureLabel = EditorGUIUtility.TrTextContent("Force Render to Texture", "When Enable, Disable The FinalBlitPass");
+            public static readonly GUIContent forceRenderToTextureLabel = EditorGUIUtility.TrTextContent("Force Render to Texture", "When Enable, Force Render to Texture");
             //End Add
 
         }

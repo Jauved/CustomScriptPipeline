@@ -124,6 +124,9 @@ namespace UnityEngine.Rendering.Universal
         }
 
         //Add by: Yumiao Purpose: forceNotSRGB/forceRenderToTexture
+        /// <summary>
+        /// True if Renderer Need NotSRGB Buffer
+        /// </summary>
         public bool forceNotSRGB
         {
             get => m_ForceNotSRGB;
