@@ -405,7 +405,7 @@ namespace UnityEngine.Rendering.Universal
             if (asset.useAdaptivePerformance)
                 ApplyAdaptivePerformance(ref baseCameraData);
 #endif
-            baseCameraData.isBaseCamera = true;//Add By: Yumiao Purpose: IsBaseCamera 用于判断是否是Base相机
+            baseCameraData.isBaseCamera = true; //Add by: Yumiao Purpose: IsBaseCamera 用于判断是否是Base相机
             RenderSingleCamera(context, baseCameraData, anyPostProcessingEnabled);
             EndCameraRendering(context, baseCamera);
 
@@ -423,7 +423,7 @@ namespace UnityEngine.Rendering.Universal
                 // Camera is overlay and enabled
                 if (currCameraData != null)
                 {
-                    baseCameraData.isBaseCamera = false;//Add by: Yumiao IsBaseCamera 用于判断是否是Base相机
+                    baseCameraData.isBaseCamera = false; //Add by: Yumiao IsBaseCamera 用于判断是否是Base相机
                     // Copy base settings from base camera data and initialize initialize remaining specific settings for this camera type.
                     CameraData overlayCameraData = baseCameraData;
                     bool lastCamera = i == lastActiveOverlayCameraIndex;
@@ -495,6 +495,11 @@ namespace UnityEngine.Rendering.Universal
             {
                 reflectionProbeModes = SupportedRenderingFeatures.ReflectionProbeModes.None,
                 defaultMixedLightingModes = SupportedRenderingFeatures.LightmapMixedBakeModes.Subtractive,
+                //Add Commit by: Yumiao 这里可以通过添加SupportRenderingFeatures.LightmapMixedBakeModes.Shadowmask,
+                //并且在UniversalRenderPipelineCore.cs的ShaderKeywordStrings中添加关键字
+                //public const string LightmapShadowMixing = "LIGHTMAP_SHADOW_MIXING";
+                //public const string ShadowsShadowMask = "SHADOWS_SHADOWMASK";
+                //之后再继续仿照高版本的URPPackage来修改管线以支持LightmapMixedBakeModes.Shadowmask模式
                 mixedLightingModes = SupportedRenderingFeatures.LightmapMixedBakeModes.Subtractive | SupportedRenderingFeatures.LightmapMixedBakeModes.IndirectOnly,
                 lightmapBakeTypes = LightmapBakeType.Baked | LightmapBakeType.Mixed,
                 lightmapsModes = LightmapsMode.CombinedDirectional | LightmapsMode.NonDirectional,
@@ -589,7 +594,7 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = false;
                 cameraData.antialiasing = AntialiasingMode.None;
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
-                //Add by: Yumiao Purpose: forceNotSRGB/forceRenderToTexture
+                //Add by: Yumiao Purpose: forceNotSRGB/forceRenderToTexture Scene窗口维持原状
                 cameraData.forceNotSRGB = false;
                 cameraData.forceRenderToTexture = false;
                 //End Add
@@ -656,7 +661,8 @@ namespace UnityEngine.Rendering.Universal
             cameraData.captureActions = CameraCaptureBridge.GetCaptureActions(baseCamera);
 
             bool needsAlphaChannel = Graphics.preserveFramebufferAlpha;
-            //Modify by: Yumiao 新写了CreateRenderTextureDescriptor方法的变体并调用
+            //Todo 这里其实根据cameraData.forceNotSRGB的设置, 可以用一个中间变量, 当forceNotSRGB=true时只保留一个声明
+            //Modify Add by: Yumiao 调用新写的CreateRenderTextureDescriptor方法的变体
             //Purpose: 
             //1. 添加forceNotSRGB, 是为了在Linear空间下, 仍旧可以强制获取非sRGB修正的RednerBuffer.
             //2. 添加cameraTargetDescriptorForceNotSRGB, 是为了在将场景相机渲染到RT的时候, 能得到一张同格式的, 但是没有sRGB修正的RenderTextureDescriptor.
@@ -722,7 +728,7 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.requiresOpaqueTexture = false;
             }
 
-            // Disables post if GLes2
+            // Disables post if GLes2 //Add Commit by: Yumiao 当OpenGLES2的时候, 会强制关闭后处理
             cameraData.postProcessEnabled &= SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2;
 
 #if POST_PROCESSING_STACK_2_0_0_OR_NEWER

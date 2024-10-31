@@ -19,7 +19,7 @@ Shader "Hidden/Universal Render Pipeline/Blit"
             #pragma vertex Vertex
             #pragma fragment Fragment
 
-            #pragma multi_compile _ _LINEAR_TO_SRGB_CONVERSION _SRGB_TO_LINEAR_CONVERSION //Add by: Yumiao, Purpose: SRGBToLinear 加入MultiCompile, 否则不生效
+            #pragma multi_compile _ _LINEAR_TO_SRGB_CONVERSION _SRGB_TO_LINEAR_CONVERSION //Modify Add by: Yumiao Purpose: SRGBToLinear 加入MultiCompile, 否则不生效
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #if defined(_LINEAR_TO_SRGB_CONVERSION) || defined(_SRGB_TO_LINEAR_CONVERSION)
@@ -59,7 +59,7 @@ Shader "Hidden/Universal Render Pipeline/Blit"
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
                 half4 col = SAMPLE_TEXTURE2D_X(_BlitTex, sampler_BlitTex, input.uv);
                 
-                //Add by Yumiao Purpose: SRGBToLinear
+                //Add by: Yumiao Purpose: SRGBToLinear
                 //Purpose: 从这一步重新汇入Unity默认管线
                 #ifdef _SRGB_TO_LINEAR_CONVERSION
                 col = SRGBToLinear(col);
